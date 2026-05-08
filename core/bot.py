@@ -2,7 +2,7 @@
 import threading
 
 from config import DETAIL_STATES, AWAITING_STATES, SERVICE_LABELS, SALUDOS
-from services.telegram_service import send_telegram
+from services.whatsapp import send_telegram
 import core.state as state
 from core.appointment_flow import consultaHorariosDisponibles, verificaDisponibilidad
 
