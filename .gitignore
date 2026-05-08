@@ -1,0 +1,18 @@
+# Credenciales sensibles - NUNCA subir al repo
+credentials.json
+token.pickle
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+target/
+*.class
+*.jar
+
+# Archivos de backup/desarrollo
+app_ba.py
