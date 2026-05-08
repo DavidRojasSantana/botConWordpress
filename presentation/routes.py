@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from config import ADMIN_KEY, SESSION_TIMEOUT_MINUTES
 from database.appointment_repo import get_all_appointments
 
-from services.telegram_service import send_telegram 
+from services.whatsapp import send_telegram 
 from presentation.menus import menu1
 import core.state as state
 from core.bot import handle_message
