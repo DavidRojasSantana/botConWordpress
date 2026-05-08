@@ -1,5 +1,5 @@
 # services/whatsapp.py – Wrapper de la API de WhatsApp Business
-# services/telegram_service.py (Reemplazo total)
+
 import core.state as state
 
 def send_telegram(to: str, text: str, image: str = None) -> dict:

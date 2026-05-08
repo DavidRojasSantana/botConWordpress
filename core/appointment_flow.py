@@ -20,7 +20,7 @@ def _get_slot_lock(slot_key: str) -> threading.Lock:
 from config import HORARIOS, CALENDAR_ID, ENGINEER_EMAIL, EMAIL_SENDER
 from models.appointment import Appointment
 from database.appointment_repo import save_appointment
-from services.telegram_service import send_telegram
+from services.whatsapp import send_telegram
 from services.email import send_email
 from services.calendar import GoogleCalendarManager
 import core.state as state
