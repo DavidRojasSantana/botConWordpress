@@ -8,7 +8,7 @@ except ImportError:
     pass
 
 # ── Telegram ───────────────────────────────────────────────────────────────────
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+#TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 # ── Email ──────────────────────────────────────────────────────────────────────
 EMAIL_SENDER   = os.getenv('EMAIL_SENDER')
@@ -70,7 +70,7 @@ AWAITING_STATES = frozenset({
 def validate_config() -> None:
     """Valida que las variables obligatorias estén presentes. Llamar desde create_app()."""
     required = {
-        'TELEGRAM_TOKEN':    TELEGRAM_TOKEN,
+      #  'TELEGRAM_TOKEN':    TELEGRAM_TOKEN,
         'EMAIL_SENDER':      EMAIL_SENDER,
         'EMAIL_PASSWORD':    EMAIL_PASSWORD,
     }
