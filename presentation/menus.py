@@ -3,7 +3,7 @@ from datetime import datetime
 from config import SERVICE_LABELS, ENGINEER_EMAIL, EMAIL_SENDER
 
 # ── CAMBIO: Importamos el servicio de Telegram ──
-from services.telegram_service import send_telegram
+from services.whatsapp import send_telegram
 from services.email import send_email
 import core.state as state
 
