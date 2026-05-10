@@ -100,7 +100,7 @@ def consultaHorariosDisponibles(user_number: str, date_str: str) -> None:
     finally:
         state.set_processing(user_number, False)
 
-def verificaDisponibilidad(user_number: str, name: str, contact_number: str,
+def verificaDisponibilidad(user_number: str, tutor_name: str, contact_number: str,
                            email: str, date_text: str) -> None:
    
     try:
@@ -123,7 +123,7 @@ def verificaDisponibilidad(user_number: str, name: str, contact_number: str,
             cal = GoogleCalendarManager(calendar_id=CALENDAR_ID)
             cal.authenticate()
         except Exception as e:
-            send_telegrams(user_number,
+            send_telegram(user_number,
                           'Error con Google Calendar. Contacta soporte.')
             print(f"[calendar] error de autenticación: {e}")
             return
@@ -156,35 +156,44 @@ def verificaDisponibilidad(user_number: str, name: str, contact_number: str,
                 state.force_state(user_number, 'awaiting_date')
                 return
 
-            # Leer servicio de interés del cliente
+            # Leer datos de la cita
             appt_data  = state.get_appointment(user_number)
-            servicio   = appt_data.get('servicio', '')
+            child_name = appt_data.get('nombre_nino', 'No especificado')
+            grade = appt_data.get('grado_escolar', 'No especificado')
+            age = appt_data.get('edad', 'No especificado')
+            especialidad = appt_data.get('especialidad', 'Consulta General')
+            respuestas = appt_data.get('respuestas', [])
+
             fecha_hora = start_time.strftime('%d/%m/%Y %H:%M')
-            srv_txt    = servicio if servicio else 'No especificado'
 
             # Crear evento en Google Calendar (envía invitación al cliente)
-            cal.create_event(name, contact_number, email, start_time, end_time, servicio)
+            # Pasamos nombre_nino + especialidad para el título/descripción
+            cal.create_event(f"Evaluación: {child_name}", contact_number, email, start_time, end_time, especialidad)
 
-            # Guardar en SQLite
+            # Guardar en MongoDB
             save_appointment(Appointment(
-                name=name,
-                contact_number=contact_number,
+                nombre_nino=child_name,
+                nombre_tutor=tutor_name,
+                celular_contacto=contact_number,
                 email=email,
-                appointment_date=start_time.strftime('%Y-%m-%d %H:%M'),
-                servicio=servicio,
+                grado_escolar=grade,
+                edad=age,
+                especialidad=especialidad,
+                respuestas=respuestas,
+                appointment_date=start_time.strftime('%Y-%m-%d %H:%M')
             ))
 
-            print(f"[cita] [OK] Slot {slot_key} reservado para {name}", flush=True)
+            print(f"[cita] [OK] Slot {slot_key} reservado para {child_name} (Tutor: {tutor_name})", flush=True)
 
             # Preparar texto de confirmación (se enviará FUERA del lock)
-            resumen = f'🔧 Servicio de interés: {srv_txt}\n' if servicio else ''
             confirmacion_texto = (
-                f'✅ ¡Cita agendada con éxito!\n\n'
-                f'👤 Nombre: {name}\n'
+                f'✅ ¡Cita agendada con éxito en la Fundación de Julián!\n\n'
+                f'👤 Tutor: {tutor_name}\n'
+                f'🧒 Niño/a: {child_name}\n'
                 f'📅 Fecha y hora: {fecha_hora}\n'
                 f'📞 Contacto: {contact_number}\n'
                 f'📧 Correo: {email}\n'
-                f'{resumen}\n'
+                f'🏥 Especialidad: {especialidad}\n\n'
                 'Recibirás una invitación en tu correo con los detalles.\n\n'
                 'Escribe "hola" para volver al menú principal.'
             )
@@ -198,22 +207,25 @@ def verificaDisponibilidad(user_number: str, name: str, contact_number: str,
             send_telegram(user_number, confirmacion_texto)
 
             dest = ENGINEER_EMAIL or EMAIL_SENDER
-            print(f"[cita] Notificando al ingeniero -> {dest}", flush=True)
+            print(f"[cita] Notificando a la fundación -> {dest}", flush=True)
             ok = send_email(
                 dest,
-                f'Nueva cita agendada – {name} – {fecha_hora}',
+                f'Nueva cita agendada – {child_name} – {fecha_hora}',
                 f'Hola,\n\n'
-                f'Se agendó una nueva cita desde el chatbot de WhatsApp.\n\n'
-                f'👤 Nombre: {name}\n'
-                f'📱 WhatsApp: +{user_number}\n'
+                f'Se agendó una nueva cita desde el chatbot de WhatsApp para la Fundación de Julián.\n\n'
+                f'👤 Tutor: {tutor_name}\n'
+                f'🧒 Niño/a: {child_name}\n'
+                f'📱 WhatsApp de origen: +{user_number}\n'
                 f'📧 Correo: {email}\n'
                 f'📞 Contacto: {contact_number}\n'
-                f'🔧 Servicio de interés: {srv_txt}\n'
+                f'🏫 Grado Escolar: {grade}\n'
+                f'🎂 Edad: {age}\n'
+                f'🏥 Especialidad Recomendada: {especialidad}\n'
                 f'📅 Fecha y hora: {fecha_hora}\n\n'
                 f'El evento ya fue creado en Google Calendar y el cliente recibió la invitación.\n\n'
-                f'— Chatbot de Proyectos Web'
+                f'— Chatbot Fundación de Julián'
             )
-            print(f"[cita] Email al ingeniero: {'OK enviado' if ok else 'FALLO'}", flush=True)
+            print(f"[cita] Email a la fundación: {'OK enviado' if ok else 'FALLO'}", flush=True)
 
         # Limpiar sesión del usuario
         state.clear_session(user_number)
