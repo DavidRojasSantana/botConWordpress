@@ -9,16 +9,13 @@ import core.state as state
 
 def menu1(user_number: str) -> None:
     texto = (
-        'Bienvenido/a, este canal corresponde a un asistente virtual automatizado de Proyectos Web\n'
-        'Tenga en cuenta que no está interactuando con una persona real. Nuestro asistente está\n'
-        'diseñado para brindarle información y gestionar solicitudes específicas\n'
-        'Para comunicarse con este chat solo digite el numero de las opciones sin puntos ni espacios\n\n'
-        'Bienvenido a Proyectos Web, donde diseñamos tu presencia digital.\n\n'
-        'Estas son las opciones que podemos ofrecer:\n\n'
-        '1- Conocer nuestros servicios\n'
-        '2- Agendar una cita'
+        'Bienvenido/a a la Fundación de Julián.\n\n'
+        'Este es nuestro asistente virtual diseñado para ayudarte a agendar una cita y '
+        'realizar una evaluación inicial. Tenga en cuenta que no está interactuando con '
+        'una persona real.\n\n'
+        'Para comenzar con el proceso y agendar una cita, responde con "1".'
     )
-    imagen = 'https://raw.githubusercontent.com/DavidRojasSantana/imagenes/refs/heads/main/logo1.jpg'
+    imagen = 'https://raw.githubusercontent.com/DavidRojasSantana/imagenes/refs/heads/main/logo1.jpg' # Podríamos cambiarlo si tuviéramos un logo de la fundación
     send_telegram(user_number, texto, imagen)
     state.set_state(user_number, 'main')
 
