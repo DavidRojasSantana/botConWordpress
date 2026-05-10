@@ -18,7 +18,14 @@ def init_db() -> None:
             return
 
         _client = MongoClient(MONGO_URI)
-        _db = _client.get_default_database() # Toma la BD por defecto del URI
+
+        # Intentamos obtener la base de datos por defecto del URI
+        try:
+            from pymongo.errors import ConfigurationError
+            _db = _client.get_default_database()
+        except ConfigurationError:
+            # Si el URI no tiene una base de datos definida al final, usamos una por defecto
+            _db = _client.get_database('fundacion_julian')
 
         # Test de conexión
         _client.admin.command('ping')
