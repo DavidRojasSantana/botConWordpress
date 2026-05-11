@@ -28,6 +28,7 @@ DB_PATH = os.getenv(
     'DB_PATH',
     os.path.join(os.path.dirname(os.path.abspath(__file__)), 'appointments.db')
 )
+
 MONGO_URI = os.getenv('MONGO_URI')
 
 # ── Administración ─────────────────────────────────────────────────────────────

@@ -4,30 +4,25 @@ import os
 from config import MONGO_URI
 from models.appointment import Appointment
 
-# Cliente global
 _client = None
 _db = None
 
 def init_db() -> None:
-    """Inicializa la conexión con MongoDB."""
+    """Inicializa la base de datos MongoDB"""
     global _client, _db
     try:
-        # Si no hay URI en config, no conectamos, pero podemos advertir
         if not MONGO_URI:
             print("Advertencia: No se encontró MONGO_URI en la configuración.")
             return
 
         _client = MongoClient(MONGO_URI)
 
-        # Intentamos obtener la base de datos por defecto del URI
         try:
             from pymongo.errors import ConfigurationError
             _db = _client.get_default_database()
         except ConfigurationError:
-            # Si el URI no tiene una base de datos definida al final, usamos una por defecto
             _db = _client.get_database('fundacion_julian')
 
-        # Test de conexión
         _client.admin.command('ping')
         print(f"Conectado a MongoDB, base de datos: {_db.name}")
     except Exception as e:
@@ -35,19 +30,18 @@ def init_db() -> None:
 
 
 def save_appointment(appt: Appointment) -> None:
-    """Inserta una cita confirmada en la base de datos MongoDB."""
+    """Inserta una cita confirmada en la base de datos."""
     global _db
     if _db is None:
         print("Error: Base de datos no inicializada.")
         return
 
     try:
-        # Convertimos el dataclass a dict, omitiendo los id temporales si es necesario
         from dataclasses import asdict
         doc = asdict(appt)
 
         if doc.get('id') is None:
-            del doc['id'] # MongoDB usará _id
+            del doc['id']
 
         result = _db.appointments.insert_one(doc)
         print(f"Cita guardada en MongoDB con _id: {result.inserted_id}")
@@ -62,11 +56,9 @@ def get_all_appointments() -> list:
         return []
 
     try:
-        # Buscamos todas y ordenamos por fecha (si tiene un formato ordenable, YYYY-MM-DD HH:MM)
         cursor = _db.appointments.find().sort("appointment_date", 1)
         results = []
         for doc in cursor:
-            # Convertimos ObjectId a string por si se requiere enviar por JSON
             doc['_id'] = str(doc['_id'])
             results.append(doc)
         return results
