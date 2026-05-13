@@ -1,0 +1,31 @@
+[33mcommit c5234b818ecc9d003190c0320125e7c6bceeff48[m
+Author: google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>
+Date:   Sun May 10 19:33:56 2026 +0000
+
+    fix(mongo): handle missing default database in URI
+    
+    - Modify `init_db()` in `database/appointment_repo.py` to catch `ConfigurationError` from `pymongo`
+    - Automatically fallback to `fundacion_julian` database if the connection string provided in `MONGO_URI` lacks a default database suffix
+    
+    Co-authored-by: DavidRojasSantana <186185976+DavidRojasSantana@users.noreply.github.com>
+
+[1mdiff --git a/database/appointment_repo.py b/database/appointment_repo.py[m
+[1mindex 3e6d961..c2ebb59 100644[m
+[1m--- a/database/appointment_repo.py[m
+[1m+++ b/database/appointment_repo.py[m
+[36m@@ -18,7 +18,14 @@[m [mdef init_db() -> None:[m
+             return[m
+ [m
+         _client = MongoClient(MONGO_URI)[m
+[31m-        _db = _client.get_default_database() # Toma la BD por defecto del URI[m
+[32m+[m
+[32m+[m[32m        # Intentamos obtener la base de datos por defecto del URI[m
+[32m+[m[32m        try:[m
+[32m+[m[32m            from pymongo.errors import ConfigurationError[m
+[32m+[m[32m            _db = _client.get_default_database()[m
+[32m+[m[32m        except ConfigurationError:[m
+[32m+[m[32m            # Si el URI no tiene una base de datos definida al final, usamos una por defecto[m
+[32m+[m[32m            _db = _client.get_database('fundacion_julian')[m
+ [m
+         # Test de conexión[m
+         _client.admin.command('ping')[m
